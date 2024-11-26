@@ -52,6 +52,7 @@ set(
     dialogs/qrealpointvaluedialog.cpp
     dialogs/renderoutputwidget.cpp
     dialogs/scenesettingsdialog.cpp
+    dialogs/addmaskdialog.cpp
     gradientwidgets/currentgradientwidget.cpp
     gradientwidgets/displayedgradientswidget.cpp
     gradientwidgets/gradientslistwidget.cpp
@@ -124,6 +125,7 @@ set(
     dialogs/qrealpointvaluedialog.h
     dialogs/renderoutputwidget.h
     dialogs/scenesettingsdialog.h
+    dialogs/addmaskdialog.h
     gradientwidgets/currentgradientwidget.h
     gradientwidgets/displayedgradientswidget.h
     gradientwidgets/gradientslistwidget.h

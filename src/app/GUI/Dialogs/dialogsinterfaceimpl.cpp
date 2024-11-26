@@ -36,6 +36,7 @@
 #include "GUI/mainwindow.h"
 #include "GUI/Expressions/expressiondialog.h"
 #include "dialogs/durationrectsettingsdialog.h"
+#include "dialogs/addmaskdialog.h"
 //#include "GUI/Dialogs/animationtopaintdialog.h"
 #include "dialogs/applyexpressiondialog.h"
 #include "dialogs/scenesettingsdialog.h"
@@ -110,6 +111,13 @@ void DialogsInterfaceImpl::showDurationSettingsDialog(
     const auto dialog = new DurationRectSettingsDialog(target, parent);
     dialog->setAttribute(Qt::WA_DeleteOnClose);
     dialog->show();
+}
+
+void DialogsInterfaceImpl::showMaskDialog(int &val) const{
+    const auto parent = MainWindow::sGetInstance();
+    const auto dialog = new AddMaskDialog(val, parent);
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    dialog->exec(); // Awaits for input
 }
 
 /*bool DialogsInterfaceImpl::execAnimationToPaint(

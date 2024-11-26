@@ -124,6 +124,9 @@ public:
     void moveSelectedBoxesByAbs(const QPointF &by,
                                 const bool startTransform);
     void groupSelectedBoxes();
+    void layerSelectedBoxes();
+
+    void maskSelected();
 
     //void selectAllBoxes();
     void deselectAllBoxes();

@@ -131,6 +131,8 @@ public:
     UndoableAction* objectsToPathAction;
     UndoableAction* strokeToPathAction;
 
+    UndoableAction* maskAction;
+
     UndoableAction* groupAction;
     UndoableAction* ungroupAction;
 

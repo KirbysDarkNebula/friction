@@ -722,6 +722,17 @@ void MainWindow::setupMenuBar()
 
     mObjectMenu->addSeparator();
 
+    const auto maskQAct = mObjectMenu->addAction(
+                tr("Mask", "MenuBar_Object"));
+    maskQAct->setIcon(QIcon::fromTheme("group"));
+    maskQAct->setShortcut(Qt::CTRL + Qt::Key_M);
+    mActions.maskAction->connect(maskQAct);
+    maskQAct->setData(tr("Add Mask"));
+    cmdAddAction(maskQAct);
+
+    
+    mObjectMenu->addSeparator();
+
     const auto groupQAct = mObjectMenu->addAction(
                 tr("Group", "MenuBar_Object"));
     groupQAct->setIcon(QIcon::fromTheme("group"));

@@ -497,6 +497,15 @@ bool CanvasWindow::handleParentChangeKeyPress(QKeyEvent *event)
     return true;
 }
 
+bool CanvasWindow::handleMaskKeyPress(QKeyEvent *event)
+{
+    if (event->modifiers() & Qt::ControlModifier &&
+        event->key() == Qt::Key_M) {
+            *mActions.maskAction;
+    } else { return false; }
+    return true;
+}
+
 bool CanvasWindow::handleGroupChangeKeyPress(QKeyEvent *event)
 {
     if (event->modifiers() & Qt::ControlModifier &&
@@ -649,6 +658,7 @@ bool CanvasWindow::KFT_keyPressEvent(QKeyEvent *event)
     if (handleTransformationKeyPress(event)) { return true; }
     if (handleZValueKeyPress(event)) { return true; }
     if (handleParentChangeKeyPress(event)) { return true; }
+    if (handleMaskKeyPress(event)) { return true; }
     if (handleGroupChangeKeyPress(event)) { return true; }
     if (handleResetTransformKeyPress(event)) { return true; }
     if (handleRevertPathKeyPress(event)) { return true; }

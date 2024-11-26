@@ -48,6 +48,7 @@ public:
             QrealAnimator* const target) const = 0;
     virtual void showDurationSettingsDialog(
             DurationRectangle* const target) const = 0;
+    virtual void showMaskDialog(int  &val) const = 0;
     /*virtual bool execAnimationToPaint(
             const AnimationBox* const src,
             int& firstAbsFrame, int& lastAbsFrame,

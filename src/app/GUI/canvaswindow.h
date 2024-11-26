@@ -155,6 +155,7 @@ private:
     bool handleTransformationKeyPress(QKeyEvent *event);
     bool handleZValueKeyPress(QKeyEvent *event);
     bool handleParentChangeKeyPress(QKeyEvent *event);
+    bool handleMaskKeyPress(QKeyEvent *event);
     bool handleGroupChangeKeyPress(QKeyEvent *event);
     bool handleResetTransformKeyPress(QKeyEvent *event);
     bool handleRevertPathKeyPress(QKeyEvent *event);

@@ -785,6 +785,12 @@ void BoundingBox::setupCanvasMenu(PropertyMenu * const menu)
 
     menu->addSeparator();
 
+    menu->addPlainAction(QIcon::fromTheme("group"), tr("Add Mask"), [pScene]() {
+        pScene->maskSelected();
+    })->setShortcut(Qt::CTRL + Qt::Key_M);
+
+    menu->addSeparator();
+
     menu->addPlainAction(QIcon::fromTheme("copy"), tr("Copy"), [pScene]() {
         pScene->copyAction();
     })->setShortcut(Qt::CTRL + Qt::Key_C);

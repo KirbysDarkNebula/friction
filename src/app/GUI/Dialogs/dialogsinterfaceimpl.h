@@ -36,6 +36,7 @@ public:
     void showExpressionDialog(QrealAnimator* const target) const;
     void showApplyExpressionDialog(QrealAnimator* const target) const;
     void showDurationSettingsDialog(DurationRectangle* const target) const;
+    void showMaskDialog(int &val) const;
     /*bool execAnimationToPaint(const AnimationBox* const src,
                               int& firstAbsFrame, int& lastAbsFrame,
                               int& increment) const;*/

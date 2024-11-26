@@ -211,6 +211,21 @@ Actions::Actions(Document &document) : mDocument(document) {
                                                 this);
     }
 
+    { // maskAction
+        const auto maskActionCan = [this]() {
+            if(!mActiveScene) return false;
+            return !mActiveScene->isBoxSelectionEmpty();
+        };
+        const auto maskActionExec = [this]() {
+            mActiveScene->maskSelected();
+            afterAction();
+        };
+        maskAction = new UndoableAction(maskActionCan,
+                                         maskActionExec,
+                                         "Mask", pushName,
+                                         this);
+    }
+
     { // groupAction
         const auto groupActionCan = [this]() {
             if(!mActiveScene) return false;
@@ -902,6 +917,13 @@ void Actions::connectToActiveScene(Canvas* const scene) {
                         objectsToPathAction, &Action::raiseCanExecuteChanged);
         conn << connect(mActiveScene, &Canvas::objectSelectionChanged,
                         strokeToPathAction, &Action::raiseCanExecuteChanged);
+    }
+
+    maskAction->raiseCanExecuteChanged();
+
+    if (mActiveScene){
+        conn << connect(mActiveScene, &Canvas::objectSelectionChanged,
+                        maskAction, &Action::raiseCanExecuteChanged);
     }
 
     groupAction->raiseCanExecuteChanged();

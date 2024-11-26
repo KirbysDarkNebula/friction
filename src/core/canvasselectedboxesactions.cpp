@@ -25,14 +25,104 @@
 
 #include "Boxes/svglinkbox.h"
 #include "Boxes/videobox.h"
+#include "Boxes/circle.h"
+#include "Boxes/rectangle.h"
+#include "Boxes/boundingbox.h"
+#include "Boxes/containerbox.h"
+#include "Boxes/smartvectorpath.h"
+#include "Boxes/textbox.h"
+#include "GUI/dialogsinterface.h"
 #include "canvas.h"
 #include "MovablePoints/pathpivot.h"
 #include "PathEffects/patheffectsinclude.h"
-#include "Boxes/smartvectorpath.h"
 #include "Animators/SmartPath/smartpathcollection.h"
 #include "Private/document.h"
 #include "eevent.h"
-#include "Boxes/textbox.h"
+
+void Canvas::maskSelected() {
+
+        BoundingBox *currentBox = getCurrentBox();
+        int retVal = 0;
+        const auto& instance = DialogsInterface::instance();
+        instance.showMaskDialog(retVal);
+        
+        if (retVal == 0){return;} // cancelled operation
+        int maskType = ((retVal & 0b110) >> 1) -1;
+        int maskMode = retVal & 0b1;
+
+        QRectF currentRect = currentBox->getAbsBoundingRect();
+        switch (maskType)
+        {
+        case 0: // Rectangle mask
+            {
+                // Make circle and setup basic info
+                auto newPath = enve::make_shared<RectangleBox>();
+                newPath->planCenterPivotPosition();
+
+                mCurrentContainer->addContained(newPath);
+                
+                QPointF bPos = QPointF(0.0,0.0);
+                newPath->setAbsolutePos(bPos);
+                clearBoxesSelection();
+                addBoxToSelection(newPath.get());
+                addBoxToSelection(currentBox);
+                
+                FillSettingsAnimator* fs = (newPath->getFillSettings());
+                fs->setPaintType(FLATPAINT);
+                newPath->duplicateFillSettingsFrom(fs);
+                    
+                OutlineSettingsAnimator* os = (newPath->getStrokeSettings());
+                os->setPaintType(NOPAINT);
+                newPath->duplicateStrokeSettingsFrom(os);
+                
+                if (maskMode == 0){
+                    newPath->setBlendModeSk(SkBlendMode::kDstIn);  
+                }else{
+                    newPath->setBlendModeSk(SkBlendMode::kDstOut);  
+                }
+                newPath->setObjectName("Mask"); // Doesn't work
+                newPath->setBottomRightPos(currentRect.bottomRight());
+                newPath->setTopLeftPos(currentRect.topLeft());
+                break;
+            }
+        case 1: // Circle mask
+            {
+                // Make circle and setup basic info
+                auto newPath = enve::make_shared<Circle>();
+                newPath->planCenterPivotPosition();
+
+                mCurrentContainer->addContained(newPath);
+
+                newPath->setAbsolutePos((currentRect.bottomRight()+currentRect.topLeft())/2);
+                
+                clearBoxesSelection();
+                addBoxToSelection(newPath.get());
+                addBoxToSelection(currentBox);
+                
+                // Setup blend mode depending on decision
+                if (maskMode == 0){
+                    newPath->setBlendModeSk(SkBlendMode::kDstIn); // Normal masking 
+                }else{
+                    newPath->setBlendModeSk(SkBlendMode::kDstOut);  // Inverse masking
+                }
+
+                // Setup fill settings 
+                FillSettingsAnimator* fs = (newPath->getFillSettings());
+                fs->setPaintType(FLATPAINT);
+                newPath->duplicateFillSettingsFrom(fs);
+                    
+                OutlineSettingsAnimator* os = (newPath->getStrokeSettings());
+                os->setPaintType(NOPAINT);
+                newPath->duplicateStrokeSettingsFrom(os);
+
+                newPath->setObjectName("Mask"); // Doesn't work
+                newPath->moveRadiusesByAbs(QPointF((currentRect.right()-currentRect.left())/2,(currentRect.bottom()-currentRect.top())/2));
+                break;
+            }
+        }
+        layerSelectedBoxes();
+        deselectAllBoxes();
+}
 
 void Canvas::groupSelectedBoxes() {
     if(mSelectedBoxes.isEmpty()) return;
@@ -47,6 +137,22 @@ void Canvas::groupSelectedBoxes() {
     newGroup->planCenterPivotPosition();
     schedulePivotUpdate();
     addBoxToSelection(newGroup.get());
+}
+
+void Canvas::layerSelectedBoxes() {
+    if(mSelectedBoxes.isEmpty()) return;
+    const auto newGroup = enve::make_shared<ContainerBox>(eBoxType::group);
+    mCurrentContainer->addContained(newGroup);
+    for(int i = mSelectedBoxes.count() - 1; i >= 0; i--) {
+        const auto boxSP = mSelectedBoxes.at(i)->ref<BoundingBox>();
+        boxSP->removeFromParent_k();
+        newGroup->addContained(boxSP);
+    }
+    clearBoxesSelectionList();
+    newGroup->planCenterPivotPosition();
+    schedulePivotUpdate();
+    addBoxToSelection(newGroup.get());
+    newGroup->promoteToLayer();
 }
 
 bool Canvas::anim_nextRelFrameWithKey(const int relFrame,
