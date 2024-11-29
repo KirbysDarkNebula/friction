@@ -34,8 +34,12 @@
 #include "GUI/dialogsinterface.h"
 #include "canvas.h"
 #include "MovablePoints/pathpivot.h"
-#include "PathEffects/patheffectsinclude.h"
+#include "MovablePoints/smartnodepoint.h"
+#include "Boxes/smartvectorpath.h"
+#include "MovablePoints/pathpointshandler.h"
 #include "Animators/SmartPath/smartpathcollection.h"
+#include "Animators/transformanimator.h"
+#include "PathEffects/patheffectsinclude.h"
 #include "Private/document.h"
 #include "eevent.h"
 
@@ -51,36 +55,20 @@ void Canvas::maskSelected() {
         int maskMode = retVal & 0b1;
 
         QRectF currentRect = currentBox->getAbsBoundingRect();
+        
         switch (maskType)
         {
         case 0: // Rectangle mask
             {
-                // Make circle and setup basic info
+                // Make rectangle and setup basic info
                 auto newPath = enve::make_shared<RectangleBox>();
                 newPath->planCenterPivotPosition();
 
                 mCurrentContainer->addContained(newPath);
-                
                 QPointF bPos = QPointF(0.0,0.0);
                 newPath->setAbsolutePos(bPos);
-                //clearBoxesSelection();
-                addBoxToSelection(newPath.get());
-                addBoxToSelection(currentBox);
-                
-                FillSettingsAnimator* fs = (newPath->getFillSettings());
-                fs->setPaintType(FLATPAINT);
-                newPath->duplicateFillSettingsFrom(fs);
-                    
-                OutlineSettingsAnimator* os = (newPath->getStrokeSettings());
-                os->setPaintType(NOPAINT);
-                newPath->duplicateStrokeSettingsFrom(os);
-                
-                if (maskMode == 0){
-                    newPath->setBlendModeSk(SkBlendMode::kDstIn);  
-                }else{
-                    newPath->setBlendModeSk(SkBlendMode::kDstOut);  
-                }
-                newPath->setObjectName("Mask"); // Doesn't work
+                maskHelper(newPath, currentBox, maskMode);
+
                 newPath->setBottomRightPos(currentRect.bottomRight());
                 newPath->setTopLeftPos(currentRect.topLeft());
                 break;
@@ -92,36 +80,60 @@ void Canvas::maskSelected() {
                 newPath->planCenterPivotPosition();
 
                 mCurrentContainer->addContained(newPath);
-
                 newPath->setAbsolutePos((currentRect.bottomRight()+currentRect.topLeft())/2);
+                maskHelper(newPath, currentBox, maskMode);
                 
-                //clearBoxesSelection();
-                addBoxToSelection(newPath.get());
-                addBoxToSelection(currentBox);
-                
-                // Setup blend mode depending on decision
-                if (maskMode == 0){
-                    newPath->setBlendModeSk(SkBlendMode::kDstIn); // Normal masking 
-                }else{
-                    newPath->setBlendModeSk(SkBlendMode::kDstOut);  // Inverse masking
-                }
-
-                // Setup fill settings 
-                FillSettingsAnimator* fs = (newPath->getFillSettings());
-                fs->setPaintType(FLATPAINT);
-                newPath->duplicateFillSettingsFrom(fs);
-                    
-                OutlineSettingsAnimator* os = (newPath->getStrokeSettings());
-                os->setPaintType(NOPAINT);
-                newPath->duplicateStrokeSettingsFrom(os);
-
-                newPath->setObjectName("Mask"); // Doesn't work
                 newPath->moveRadiusesByAbs(QPointF((currentRect.right()-currentRect.left())/2,(currentRect.bottom()-currentRect.top())/2));
+                break;
+            }
+        case 2: // Path mask
+            {
+                // Make path and setup basic info
+                auto newPath = enve::make_shared<SmartVectorPath>();
+                newPath->planCenterPivotPosition();
+
+                // Make the path a triangle to more easily edit it 
+                const auto newHandler = newPath->getPathAnimator();
+                const auto node = newHandler->createNewSubPathAtRelPos({0, -346});
+                setCurrentSmartEndPoint(node);
+                const auto node1 = mLastEndPoint->actionAddPointAbsPos({200, 0});
+                setCurrentSmartEndPoint(node1);
+                const auto node2 = mLastEndPoint->actionAddPointAbsPos({-200, 0});
+                setCurrentSmartEndPoint(node2);
+                node2->actionConnectToNormalPoint(node);
+
+                mCurrentContainer->addContained(newPath);
+                maskHelper(newPath, currentBox, maskMode);
+
+                newPath->setAbsolutePos((currentRect.bottomRight()+currentRect.topLeft())/2+QPointF(0.0,200));
                 break;
             }
         }
         layerSelectedBoxes();
-        deselectAllBoxes();
+        //deselectAllBoxesAction(); Maintain same interaction as groups (selected after creation), an option for this might be good
+}
+
+void Canvas::maskHelper(QSharedPointer<PathBox> newPath, BoundingBox * currentBox, int maskMode) {
+    addBoxToSelection(newPath.get());
+    addBoxToSelection(currentBox);
+    
+    // Setup blend mode depending on decision
+    if (maskMode == 0){
+        newPath->setBlendModeSk(SkBlendMode::kDstIn); // Normal masking 
+    }else{
+        newPath->setBlendModeSk(SkBlendMode::kDstOut);  // Inverse masking
+    }
+
+    // Setup fill settings 
+    FillSettingsAnimator* fs = (newPath->getFillSettings());
+    fs->setPaintType(FLATPAINT);
+    newPath->duplicateFillSettingsFrom(fs);
+        
+    OutlineSettingsAnimator* os = (newPath->getStrokeSettings());
+    os->setPaintType(NOPAINT);
+    newPath->duplicateStrokeSettingsFrom(os);
+
+    newPath->rename("Mask");
 }
 
 void Canvas::groupSelectedBoxes() {

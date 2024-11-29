@@ -34,12 +34,13 @@ AddMaskDialog::AddMaskDialog(int &val, QWidget *parent) :
     const auto mainLayout = new QVBoxLayout(this);
     const auto twoColumnLayout = new TwoColumnLayout();
     
-    QStringList maskTypes = {"Square", "Circle"}; //, "Image (Luma)" };
+    QStringList maskTypes = {"Square", "Circle", "Custom Path"}; //, "Image (Luma)" };
     const auto MTLabel = new QLabel("Mask shape:");
     mMaskTypeBox = new QComboBox(this);
     mMaskTypeBox->insertItems(0, maskTypes);
-    mMaskTypeBox->setItemIcon(0, QIcon::fromTheme("draw-square"));
-    mMaskTypeBox->setItemIcon(1, QIcon::fromTheme("draw-circle"));
+    mMaskTypeBox->setItemIcon(0, QIcon::fromTheme("rectCreate"));
+    mMaskTypeBox->setItemIcon(1, QIcon::fromTheme("circleCreate"));
+    mMaskTypeBox->setItemIcon(2, QIcon::fromTheme("pathCreate"));
     twoColumnLayout->addPair(MTLabel, mMaskTypeBox);
 
     const auto MMLabel = new QLabel("Inverted Mask:");

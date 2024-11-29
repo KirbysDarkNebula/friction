@@ -127,6 +127,7 @@ public:
     void layerSelectedBoxes();
 
     void maskSelected();
+    void maskHelper(QSharedPointer<PathBox> newPath, BoundingBox *currentBox, int maskMode);
 
     //void selectAllBoxes();
     void deselectAllBoxes();
