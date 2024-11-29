@@ -63,7 +63,7 @@ void Canvas::maskSelected() {
                 
                 QPointF bPos = QPointF(0.0,0.0);
                 newPath->setAbsolutePos(bPos);
-                clearBoxesSelection();
+                //clearBoxesSelection();
                 addBoxToSelection(newPath.get());
                 addBoxToSelection(currentBox);
                 
@@ -95,7 +95,7 @@ void Canvas::maskSelected() {
 
                 newPath->setAbsolutePos((currentRect.bottomRight()+currentRect.topLeft())/2);
                 
-                clearBoxesSelection();
+                //clearBoxesSelection();
                 addBoxToSelection(newPath.get());
                 addBoxToSelection(currentBox);
                 
